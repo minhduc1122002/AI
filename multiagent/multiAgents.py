@@ -72,27 +72,22 @@ class ReflexAgent(Agent):
         newPos = successorGameState.getPacmanPosition()
         newGhostStates = successorGameState.getGhostStates()
 
-        if successorGameState.getNumFood() == 0:
-            return math.inf
-
         ghostDistances = [manhattanDistance(newPos, ghost.configuration.pos)
                           for ghost in newGhostStates
                           if ghost.scaredTimer == 0]
 
         minGhostDist = min(ghostDistances) if ghostDistances else 100
 
-        if minGhostDist == 0:
-            return -math.inf
-
         if newPos in currentGameState.getFood().asList():
             minFoodDist = 0
         else:
-            foodDistances = [manhattanDistance(newPos, foodPos) for foodPos in currentGameState.getFood().asList()]
+            foodDistances = [manhattanDistance(newPos, foodPos) for foodPos in successorGameState.getFood().asList()]
             minFoodDist = min(foodDistances)
 
-        # small ghost distance = high danger
-        # small food distance = high profit
-        return 1 / (minFoodDist + 1) - 1 / (minGhostDist * 2 - 1)
+        danger = 100 / (minGhostDist * 2 - 1)
+        profit = 100 / (minFoodDist + 1)
+        score = successorGameState.getScore() + profit - danger
+        return score
 
 
 def scoreEvaluationFunction(currentGameState):
@@ -267,7 +262,39 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # pacman
+    pacmanPos = currentGameState.getPacmanPosition()
+
+    # food
+    foodList = currentGameState.getFood().asList()
+
+    # ghost
+    ghostPos = currentGameState.getGhostPosition(1)
+    ghostTimer = currentGameState.getGhostStates()[0].scaredTimer
+    ghostDis = manhattanDistance(ghostPos, pacmanPos)
+
+    # Capsules
+    capsules = currentGameState.getCapsules()
+
+    # food
+    foodDists = [manhattanDistance(pacmanPos, foodPos) for foodPos in foodList]
+    minFoodDist = min(foodDists) if foodDists else 0
+    foodScore = - len(foodList) * 10 - minFoodDist
+
+    # ghost
+    if ghostTimer > 0:
+        ghostScore = max(- ghostDis, -5)
+    else:
+        ghostScore = - max(- ghostDis, -5)
+
+    # capsules
+    capDists = [manhattanDistance(pacmanPos, capPos) for capPos in capsules]
+    minCapDist = min(capDists) if capDists else 0
+    capScore = - len(capsules) * 100 - minCapDist
+
+    score = currentGameState.getScore() + foodScore + ghostScore + capScore
+
+    return score
 
 
 # Abbreviation

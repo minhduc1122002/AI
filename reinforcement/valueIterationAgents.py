@@ -92,7 +92,6 @@ class ValueIterationAgent(ValueEstimationAgent):
             reward = self.mdp.getReward(state, action, tState)
             qValue += prob * (reward + self.discount * self.values[tState])
         return qValue
-        util.raiseNotDefined()
 
     def computeActionFromValues(self, state):
         """
@@ -112,7 +111,6 @@ class ValueIterationAgent(ValueEstimationAgent):
             actions[a] = self.computeQValueFromValues(state, a)
         policy = actions.argMax()
         return policy
-        util.raiseNotDefined()
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
@@ -153,6 +151,14 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        states = self.mdp.getStates()
+        for i in range(self.iterations):
+            valueForState = util.Counter()
+            stateIndex = i % len(states)
+            action = self.getAction(states[stateIndex])
+            if (action):
+                valueForState[states[stateIndex]] = self.computeQValueFromValues(states[stateIndex], action)
+            self.values[states[stateIndex]] = valueForState[states[stateIndex]]
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     """
