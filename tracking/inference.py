@@ -352,7 +352,7 @@ class ParticleFilter(InferenceModule):
                 self.particles += self.legalPositions
                 numParticlesLeft -= numPos
             else:
-                self.particles += self.legalPositions[0:numParticlesLeft]
+                self.particles += self.legalPositions[0: numParticlesLeft]
                 numParticlesLeft = 0
 
     def observeUpdate(self, observation, gameState):
@@ -420,16 +420,15 @@ class JointParticleFilter(ParticleFilter):
         self.particles = []
         "*** YOUR CODE HERE ***"
         allGhostCombinations = list(itertools.product(self.legalPositions, repeat=self.numGhosts))
-        gap = len(allGhostCombinations) / self.numParticles
-        count = 0
-        gap_acc = 0
-
-        # particles in pos if gap_acc < count + 1
-        for pos in allGhostCombinations:
-            while gap_acc < count + 1:
-                self.particles.append(pos)
-                gap_acc += gap
-            count += 1
+        numParticlesLeft = self.numParticles
+        numPos = len(allGhostCombinations)
+        while numParticlesLeft > 0:
+            if numParticlesLeft >= numPos:
+                self.particles += allGhostCombinations
+                numParticlesLeft -= numPos
+            else:
+                self.particles += allGhostCombinations[0: numParticlesLeft]
+                numParticlesLeft = 0
 
     def addGhostAgent(self, agent):
         """
