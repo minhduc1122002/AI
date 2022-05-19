@@ -368,6 +368,23 @@ class ParticleFilter(InferenceModule):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
+
+        jailPosition = self.getJailPosition()
+        pacmanPosition = gameState.getPacmanPosition()
+
+        temp_dist = DiscreteDistribution()  # the refreshed posterior_prb
+        # where the particle represent the possible position of a ghost,
+        # the frequency of a certain type of particle simulates the prob of ghost there
+        for particle in self.particles:
+            temp_dist[particle] += self.getObservationProb(observation, pacmanPosition,
+                                                           particle, jailPosition)
+        if temp_dist.total() == 0:
+            self.initializeUniformly(gameState)
+        else:
+            # resample based on the refreshed posterior_prb
+            temp_dist.normalize()
+            self.particles = [temp_dist.sample() for _ in range(self.numParticles)]
+        return
         raiseNotDefined()
 
     def elapseTime(self, gameState):
@@ -376,6 +393,13 @@ class ParticleFilter(InferenceModule):
         gameState.
         """
         "*** YOUR CODE HERE ***"
+
+        particles = []
+        for i, oldPos in enumerate(self.particles):
+            newPosDist = self.getPositionDistribution(gameState, oldPos)
+            particles.append(newPosDist.sample())
+        self.particles = particles
+        return
         raiseNotDefined()
 
     def getBeliefDistribution(self):
