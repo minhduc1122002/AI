@@ -10,7 +10,7 @@
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
-
+import sys
 
 import util
 from game import Agent
@@ -144,3 +144,19 @@ class GreedyBustersAgent(BustersAgent):
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
+        minDistance = sys.float_info.max
+        for dist in livingGhostPositionDistributions:
+            pos = dist.argMax()
+            distance = self.distancer.getDistance(pacmanPosition, pos)
+            if distance < minDistance:
+                minDistance = distance
+                closestPos = pos
+
+        newMinDistance = sys.float_info.max
+        for a in legal:
+            successorPosition = Actions.getSuccessor(pacmanPosition, a)
+            newDistance = self.distancer.getDistance(successorPosition, closestPos)
+            if newDistance < newMinDistance:
+                action = a
+                newMinDistance = newDistance
+        return action

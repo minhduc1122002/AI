@@ -311,7 +311,14 @@ class ExactInference(InferenceModule):
         current position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        newBeliefs = DiscreteDistribution()
+
+        # B' t+1(X t+1) = Σ(xt) P(X t+1|x t) * B t(x t)
+        for oldPos in self.allPositions:
+            newPosDist = self.getPositionDistribution(gameState, oldPos)
+            for newPos, prob in newPosDist.items():
+                newBeliefs[newPos] += (prob * self.beliefs[oldPos])
+        self.beliefs = newBeliefs
 
     def getBeliefDistribution(self):
         return self.beliefs
@@ -338,7 +345,15 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        numParticlesLeft = self.numParticles
+        numPos = len(self.legalPositions)
+        while numParticlesLeft > 0:
+            if numParticlesLeft >= numPos:
+                self.particles += self.legalPositions
+                numParticlesLeft -= numPos
+            else:
+                self.particles += self.legalPositions[0:numParticlesLeft]
+                numParticlesLeft = 0
 
     def observeUpdate(self, observation, gameState):
         """
